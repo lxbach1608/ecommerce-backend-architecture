@@ -2,6 +2,7 @@ const express = require("express");
 const Database = require("./db/init.mongodb");
 const { checkOverload } = require("./helpers/check.connect");
 
+require("dotenv").config();
 const morgan = require("morgan");
 const helmet = require("helmet");
 const compression = require("compression");

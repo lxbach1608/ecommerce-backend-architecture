@@ -2,8 +2,11 @@
 
 const mongoose = require("mongoose");
 const { checkCountConnect } = require("../helpers/check.connect");
+const {
+  mongodb: { port, host, name },
+} = require("../configs/config.env");
 
-const _CONNECTION_STR = "mongodb://localhost:27017/backendArchitecture";
+const _CONNECTION_STR = `mongodb://${host}:${port}/${name}`;
 
 // singleton pattern
 class Database {
