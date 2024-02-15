@@ -19,14 +19,8 @@ Database.connect();
 checkOverload();
 
 // init routes
-app.get("/", (req, res, next) => {
-  const compressStr = "repeating...";
-
-  return res.status(200).json({
-    message: "success",
-    metadata: compressStr.repeat(10000),
-  });
-});
+const router = require("./routes");
+app.use("/", router);
 
 // handling error
 
