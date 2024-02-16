@@ -2,8 +2,8 @@
 
 const { Schema, model } = require("mongoose");
 
-const COLLECTION_NAME = "Keys";
 const DOCUMENT_NAME = "Key";
+const COLLECTION_NAME = "Keys";
 
 const keyTokenScheme = new Schema(
   {
@@ -12,7 +12,7 @@ const keyTokenScheme = new Schema(
       required: true,
       ref: "shop",
     },
-    accessToken: {
+    publicKey: {
       type: String,
       required: true,
     },

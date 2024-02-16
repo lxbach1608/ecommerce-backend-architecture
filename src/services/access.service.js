@@ -1,9 +1,10 @@
 "use strict";
 
 const bcrypt = require("bcrypt");
-const crypto = require("crypto");
+// const crypto = require("crypto");
 const shopModel = require("../models/shop.model");
-const { createTokenPair } = require("../utils/authJWT.util");
+const { createTokenPair } = require("../auth/authJWT");
+const { getInfoData } = require("../utils");
 const KeyTokenService = require("./keyToken.service");
 
 // this code will define in docs'folder for developers
@@ -17,7 +18,7 @@ const roleShop = {
 
 class AccessService {
   // signUp
-  static signUp = async (name, email, password) => {
+  static signUp = async ({ name, email, password }) => {
     // step 1: check email exist ?
     const holderShop = await shopModel.findOne({ email }).lean();
 
@@ -29,7 +30,7 @@ class AccessService {
     }
 
     // hash password to prevent hacker or client don't know about this
-    hashedPassword = await bcrypt.hash(password, 10);
+    const hashedPassword = await bcrypt.hash(password, 10);
 
     const newShop = await shopModel.create({
       name,
@@ -43,16 +44,23 @@ class AccessService {
       // privateKey for sign && publicKey for verify
       const { privateKey, publicKey } = crypto.generateKeyPairSync("rsa", {
         modulusLength: 4096,
+        publicKeyEncoding: {
+          type: "spki",
+          format: "pem",
+        },
+        privateKeyEncoding: {
+          type: "pkcs8",
+          format: "pem",
+        },
       });
 
-      console.log("privateKey::" + privateKey);
-      console.log("publicKey::" + publicKey);
+      console.log({ publicKey, privateKey });
 
       // store publicKey
-      const keyToken = await KeyTokenService.createKeyToken(
-        newShop._id,
-        publicKey
-      );
+      const keyToken = await KeyTokenService.createKeyToken({
+        shopId: newShop._id,
+        publicKey,
+      });
 
       if (!keyToken) {
         return {
@@ -61,11 +69,13 @@ class AccessService {
         };
       }
 
+      const publicKeyObj = crypto.createPublicKey(keyToken);
+
       // create token pair
-      const tokens = await createTokenPair(
+      const tokens = createTokenPair(
         { userId: newShop._id, email },
-        privateKey,
-        publicKey
+        publicKeyObj,
+        privateKey
       );
 
       console.log("Created tokens success::", tokens);
@@ -73,7 +83,7 @@ class AccessService {
       return {
         code: 201,
         metadata: {
-          shop: newShop,
+          shop: getInfoData({ obj: newShop, fields: ["_id", "name", "email"] }),
           tokens,
         },
       };
