@@ -1,11 +1,11 @@
 "use strict";
 
 const bcrypt = require("bcrypt");
-// const crypto = require("crypto");
+const crypto = require("crypto");
 const shopModel = require("../models/shop.model");
 const { createTokenPair } = require("../auth/authJWT");
 const { getInfoData } = require("../utils");
-const KeyTokenService = require("./keyToken.service");
+const KeyTokenService = require("./keytoken.service");
 
 // this code will define in docs'folder for developers
 // which prevent client to notice roles
@@ -25,7 +25,7 @@ class AccessService {
     if (holderShop) {
       return {
         code: "xxx",
-        message: "this email already registered !",
+        message: "This email already registered !",
       };
     }
 
@@ -69,12 +69,12 @@ class AccessService {
         };
       }
 
-      const publicKeyObj = crypto.createPublicKey(keyToken);
+      const publicKeyObject = crypto.createPublicKey(keyToken);
 
-      // create token pair
+      // create token pair (accessToken and refreshToken)
       const tokens = createTokenPair(
         { userId: newShop._id, email },
-        publicKeyObj,
+        publicKeyObject,
         privateKey
       );
 
