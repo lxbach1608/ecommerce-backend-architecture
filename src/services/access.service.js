@@ -5,6 +5,7 @@ const crypto = require("crypto");
 const shopModel = require("../models/shop.model");
 const { createTokenPair } = require("../auth/authJWT");
 const { getInfoData } = require("../utils");
+const { BadRequestError } = require("../core/error.response");
 const KeyTokenService = require("./keytoken.service");
 
 // this code will define in docs'folder for developers
@@ -23,10 +24,7 @@ class AccessService {
     const holderShop = await shopModel.findOne({ email }).lean();
 
     if (holderShop) {
-      return {
-        code: "xxx",
-        message: "This email already registered !",
-      };
+      throw new BadRequestError("This email already registered");
     }
 
     // hash password to prevent hacker or client don't know about this
