@@ -29,13 +29,13 @@ const router = require("./routes");
 app.use("/", router);
 
 // handling error
-app.use((req, res, next) => {
-  const error = new Error("Not Found");
+// app.use((req, res, next) => {
+//   const error = new Error("Not Found");
 
-  error.status = 404;
+//   error.status = 404;
 
-  return next(error);
-});
+//   return next(error);
+// });
 
 app.use((error, req, res, next) => {
   const statusCode = error.status || 500;

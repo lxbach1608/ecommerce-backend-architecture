@@ -1,30 +1,38 @@
-"use strict";
+'use strict';
 
-const { Schema, model } = require("mongoose");
+const { Schema, model } = require('mongoose');
 
-const COLLECTION_NAME = "Keys";
-const DOCUMENT_NAME = "Key";
+const COLLECTION_NAME = 'Keys';
+const DOCUMENT_NAME = 'Key';
 
 const keyTokenScheme = new Schema(
   {
     userId: {
       type: Schema.Types.ObjectId,
       required: true,
-      ref: "shop",
+      ref: 'Shop',
     },
     publicKey: {
       type: String,
       required: true,
     },
-    refreshToken: {
+    privateKey: {
+      type: String,
+      required: true,
+    },
+    refreshTokenUsed: {
       type: Array,
       default: [],
+    },
+    refreshToken: {
+      type: String,
+      required: true,
     },
   },
   {
     timestamps: true,
-    collation: COLLECTION_NAME,
-  }
+    collection: COLLECTION_NAME,
+  },
 );
 
 module.exports = model(DOCUMENT_NAME, keyTokenScheme);

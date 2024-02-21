@@ -1,4 +1,4 @@
-"use strict";
+'use strict';
 
 const StatusCode = {
   OK: 200,
@@ -6,8 +6,8 @@ const StatusCode = {
 };
 
 const ReasonStatusCode = {
-  OK: "Success",
-  CREATED: "Created",
+  OK: 'Success',
+  CREATED: 'Created',
 };
 
 class SuccessResponse {
@@ -21,12 +21,10 @@ class SuccessResponse {
     statusCode = StatusCode.OK,
     reasonStatusCode = ReasonStatusCode.OK,
     metadata = {},
-    options = {}
   ) {
     this.message = message ? message : reasonStatusCode;
     this.status = statusCode;
     this.metadata = metadata;
-    this.options = options;
   }
 
   send(res, headers = {}) {

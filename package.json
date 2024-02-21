@@ -22,6 +22,7 @@
   "devDependencies": {
     "@types/node": "^20.11.19",
     "helmet": "^7.1.0",
-    "morgan": "^1.10.0"
+    "morgan": "^1.10.0",
+    "prettier": "^3.2.5"
   }
 }
