@@ -3,9 +3,9 @@
 const bcrypt = require('bcrypt');
 const crypto = require('crypto');
 const shopModel = require('../models/shop.model');
-const { createTokenPair } = require('../auth/authJWT');
+const { createTokenPair, verifyJWT } = require('../auth/authJWT');
 const { getInfoData, cryptoGenerateKeyPair } = require('../utils');
-const { BadRequestError, AuthFailureError } = require('../core/error.response');
+const { BadRequestError, AuthFailureError, NotFoundError } = require('../core/error.response');
 const KeyTokenService = require('./keytoken.service');
 const ShopService = require('./shop.service');
 
@@ -100,8 +100,6 @@ class AccessService {
       // privateKey for sign && publicKey for verify
       const { privateKey, publicKey } = cryptoGenerateKeyPair();
 
-      console.log({ publicKey, privateKey });
-
       // store publicKey
       const keyToken = await KeyTokenService.createKeyToken({
         shopId: newShop._id,
@@ -109,15 +107,8 @@ class AccessService {
         privateKey,
       });
 
-      console.log({ keyToken });
-
       if (!keyToken) {
         throw new BadRequestError('keyToken error !');
-
-        // return {
-        //   code: "xxx",
-        //   message: "keyToken error !",
-        // };
       }
 
       const publicKeyObject = crypto.createPublicKey(keyToken); // if use RSA public key
@@ -137,6 +128,84 @@ class AccessService {
 
     return {
       metadata: null,
+    };
+  };
+
+  static handleRefreshToken = async ({ refreshToken }) => {
+    // 1. check 'refreshToken' exists in refreshTokenUsed
+    // 2. if exist => decode accessToken to check who use this?
+    // 2.1 delete all tokens in keyToken
+    // 3. if not exist => check accessToken is using right now ? are we created it ?
+    // 4. decode token
+    // 5. checking email to check valid shop
+    // 6. create new tokens(refreshToken and accessToken)
+    // 7. update refreshToken and set old refreshToken to refreshTokenUsed
+    // 8 return both token
+
+    console.log({ refreshToken });
+
+    if (!refreshToken) {
+      throw new AuthFailureError('refreshToken missing!');
+    }
+
+    // 1.
+    const foundedToken = await KeyTokenService.findByRefreshTokenUsed(refreshToken);
+
+    console.log({ foundedToken });
+
+    // 2.
+    if (foundedToken) {
+      console.log({ foundedToken });
+
+      const decode = verifyJWT(refreshToken, foundedToken.publicKey);
+
+      const { userId } = decode;
+
+      console.log({ decode });
+
+      await KeyTokenService.deleteByUserId(userId);
+
+      throw new NotFoundError('Something went wrong! please login again.');
+    }
+
+    // 3.
+    const holderToken = await KeyTokenService.findByRefreshToken(refreshToken);
+
+    console.log({ holderToken });
+
+    if (!holderToken) throw AuthFailureError('Shop is not registered');
+
+    // 4.
+    const decode = verifyJWT(refreshToken, holderToken.publicKey);
+
+    const { userId, email } = decode;
+
+    console.log({ decode });
+
+    // 5.
+    const foundedShop = await ShopService.findByEmail({ email });
+    const { publicKey, privateKey } = holderToken;
+
+    console.log({ foundedShop });
+
+    if (!foundedShop) throw AuthFailureError('Shop is not registered');
+
+    // 6.
+    const tokens = createTokenPair({ userId, email }, publicKey, privateKey);
+
+    // 7.
+    await holderToken.updateOne({
+      $set: {
+        refreshToken: tokens.refreshToken,
+      },
+      $addToSet: {
+        refreshTokenUsed: refreshToken,
+      },
+    });
+
+    return {
+      user: { userId, email },
+      tokens,
     };
   };
 }

@@ -16,12 +16,7 @@ class SuccessResponse {
   reasonStatus;
   metadata;
 
-  constructor(
-    message,
-    statusCode = StatusCode.OK,
-    reasonStatusCode = ReasonStatusCode.OK,
-    metadata = {},
-  ) {
+  constructor({ message, statusCode = StatusCode.OK, reasonStatusCode = ReasonStatusCode.OK, metadata = {} }) {
     this.message = message ? message : reasonStatusCode;
     this.status = statusCode;
     this.metadata = metadata;
@@ -33,28 +28,19 @@ class SuccessResponse {
 }
 
 class OK extends SuccessResponse {
-  constructor({
-    message,
-    statusCode = StatusCode.OK,
-    reasonStatus = ReasonStatusCode.OK,
-    metadata,
-  }) {
-    super(message, statusCode, reasonStatus, metadata);
+  constructor({ message, statusCode = StatusCode.OK, reasonStatusCode = ReasonStatusCode.OK, metadata }) {
+    super({ message, statusCode, reasonStatusCode, metadata });
   }
 }
 
 class CREATED extends SuccessResponse {
-  constructor({
-    message,
-    statusCode = StatusCode.CREATED,
-    reasonStatus = ReasonStatusCode.CREATED,
-    metadata,
-  }) {
-    super(message, statusCode, reasonStatus, metadata);
+  constructor({ message, statusCode = StatusCode.CREATED, reasonStatusCode = ReasonStatusCode.CREATED, metadata }) {
+    super({ message, statusCode, reasonStatusCode, metadata });
   }
 }
 
 module.exports = {
+  SuccessResponse,
   OK,
   CREATED,
 };

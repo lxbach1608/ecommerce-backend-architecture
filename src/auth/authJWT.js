@@ -47,15 +47,11 @@ const authLogout = async (req, res, next) => {
 
   const accessToken = req.headers[Headers.AUTHENTICATION];
 
-  console.log({ userId, accessToken });
-
   if (!userId && !accessToken) {
     throw new AuthFailureError('Invalid request');
   }
 
   const keyStore = await KeyTokenService.findByUserId(userId);
-
-  console.log({ keyStore });
 
   if (!keyStore) {
     throw new NotFoundError('Key not found');
@@ -63,8 +59,6 @@ const authLogout = async (req, res, next) => {
 
   try {
     const decodeAccessToken = JWT.verify(accessToken, keyStore.publicKey);
-
-    console.log({ decodeAccessToken });
 
     if (decodeAccessToken.shopId !== userId) {
       throw new AuthFailureError('Invalid UserId');
@@ -78,7 +72,14 @@ const authLogout = async (req, res, next) => {
   }
 };
 
+const verifyJWT = (token, publicKey) => {
+  const decode = JWT.verify(token, publicKey);
+
+  return decode;
+};
+
 module.exports = {
   createTokenPair,
   authLogout,
+  verifyJWT,
 };
